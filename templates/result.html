@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Inventory Prediction Result</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+
+<body>
+
+<div class="container">
+
+    <!-- =========================================
+         HEADER
+         ========================================= -->
+
+    <header class="page-header">
+
+        <h1>📦 Retail Inventory Optimizer</h1>
+
+        <p>
+            Machine Learning Based Sales Prediction
+            & Reorder Point Analysis
+        </p>
+
+    </header>
+
+
+    <!-- =========================================
+         PREDICTION INFORMATION
+         ========================================= -->
+
+    <div class="prediction-info">
+
+        <h2>📋 Prediction Result</h2>
+
+        <p>
+            Prediction Date:
+            <strong>{{ prediction_date }}</strong>
+        </p>
+
+    </div>
+
+
+    <!-- =========================================
+         RESULT CARDS
+         ========================================= -->
+
+    <div class="result-grid">
+
+
+        <!-- Predicted Daily Sales -->
+
+        <div class="result-card">
+
+            <div class="card-icon">
+                📈
+            </div>
+
+            <h3>
+                Predicted Daily Sales
+            </h3>
+
+            <div class="result-value">
+                {{ predicted_sales }}
+            </div>
+
+            <p>
+                units/day
+            </p>
+
+        </div>
+
+
+        <!-- Current Inventory -->
+
+        <div class="result-card">
+
+            <div class="card-icon">
+                📦
+            </div>
+
+            <h3>
+                Current Inventory
+            </h3>
+
+            <div class="result-value">
+                {{ current_inventory }}
+            </div>
+
+            <p>
+                units
+            </p>
+
+        </div>
+
+
+        <!-- Lead-Time Demand -->
+
+        <div class="result-card">
+
+            <div class="card-icon">
+                🚚
+            </div>
+
+            <h3>
+                Lead-Time Demand
+            </h3>
+
+            <div class="result-value">
+                {{ expected_demand }}
+            </div>
+
+            <p>
+                units
+            </p>
+
+        </div>
+
+
+        <!-- Reorder Point -->
+
+        <div class="result-card">
+
+            <div class="card-icon">
+                🔄
+            </div>
+
+            <h3>
+                Reorder Point
+            </h3>
+
+            <div class="result-value">
+                {{ reorder_point }}
+            </div>
+
+            <p>
+                units
+            </p>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =========================================
+         INVENTORY DECISION
+         ========================================= -->
+
+    <div class="decision-section">
+
+        <h2>
+            📢 Inventory Decision
+        </h2>
+
+
+        {% if recommendation == "REORDER" %}
+
+        <!-- REORDER -->
+
+        <div class="decision reorder">
+
+            <div class="decision-icon">
+                ⚠️
+            </div>
+
+            <div>
+
+                <h2>
+                    REORDER REQUIRED
+                </h2>
+
+                <p>
+                    Current inventory is at or below
+                    the calculated reorder point.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- Recommended Order Quantity -->
+
+        <div class="order-quantity">
+
+            <h3>
+                📦 Recommended Order Quantity
+            </h3>
+
+            <div class="order-value">
+                {{ recommended_order_quantity }}
+                units
+            </div>
+
+            <p>
+                Suggested quantity to bring inventory
+                back to the reorder point.
+            </p>
+
+        </div>
+
+
+        {% else %}
+
+        <!-- NO REORDER -->
+
+        <div class="decision no-reorder">
+
+            <div class="decision-icon">
+                ✅
+            </div>
+
+            <div>
+
+                <h2>
+                    NO REORDER REQUIRED
+                </h2>
+
+                <p>
+                    Current inventory is above
+                    the calculated reorder point.
+                </p>
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+
+
+    <!-- =========================================
+         VISUAL INVENTORY COMPARISON
+         ========================================= -->
+
+    <div class="chart-section">
+
+        <h2>
+            📊 Inventory Level Comparison
+        </h2>
+
+        <p class="section-description">
+
+            Comparison of current inventory,
+            reorder point and expected demand
+            during supplier lead time.
+
+        </p>
+
+
+        <div class="bar-chart">
+
+
+            <!-- Current Inventory -->
+
+            <div class="bar-item">
+
+                <div class="bar-label">
+
+                    <span>
+                        Current Inventory
+                    </span>
+
+                    <strong>
+                        {{ current_inventory }} units
+                    </strong>
+
+                </div>
+
+                <div class="bar-background">
+
+                    <div
+                        id="currentInventoryBar"
+                        class="bar current-bar"
+                        data-value="{{ current_inventory }}">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Reorder Point -->
+
+            <div class="bar-item">
+
+                <div class="bar-label">
+
+                    <span>
+                        Reorder Point
+                    </span>
+
+                    <strong>
+                        {{ reorder_point }} units
+                    </strong>
+
+                </div>
+
+                <div class="bar-background">
+
+                    <div
+                        id="reorderPointBar"
+                        class="bar reorder-bar"
+                        data-value="{{ reorder_point }}">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Lead-Time Demand -->
+
+            <div class="bar-item">
+
+                <div class="bar-label">
+
+                    <span>
+                        Lead-Time Demand
+                    </span>
+
+                    <strong>
+                        {{ expected_demand }} units
+                    </strong>
+
+                </div>
+
+                <div class="bar-background">
+
+                    <div
+                        id="leadTimeDemandBar"
+                        class="bar demand-bar"
+                        data-value="{{ expected_demand }}">
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =========================================
+         CALCULATION DETAILS
+         ========================================= -->
+
+    <div class="details-section">
+
+        <h2>
+            🧮 Calculation Details
+        </h2>
+
+
+        <div class="calculation-row">
+
+            <span>
+                Predicted Daily Sales
+            </span>
+
+            <strong>
+                {{ predicted_sales }} units
+            </strong>
+
+        </div>
+
+
+        <div class="calculation-row">
+
+            <span>
+                Lead Time
+            </span>
+
+            <strong>
+                {{ lead_time }} days
+            </strong>
+
+        </div>
+
+
+        <div class="calculation-row">
+
+            <span>
+                Expected Lead-Time Demand
+            </span>
+
+            <strong>
+                {{ expected_demand }} units
+            </strong>
+
+        </div>
+
+
+        <div class="calculation-row">
+
+            <span>
+                Safety Stock
+            </span>
+
+            <strong>
+                {{ safety_stock }} units
+            </strong>
+
+        </div>
+
+
+        <div class="calculation-row highlight">
+
+            <span>
+                Reorder Point
+            </span>
+
+            <strong>
+                {{ reorder_point }} units
+            </strong>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =========================================
+         REORDER POINT FORMULA
+         ========================================= -->
+
+    <div class="formula-section">
+
+        <h2>
+            🧮 Reorder Point Formula
+        </h2>
+
+        <div class="formula">
+
+            Reorder Point =
+            (Predicted Daily Sales × Lead Time)
+            + Safety Stock
+
+        </div>
+
+        <p>
+
+            The reorder point represents the inventory
+            level at which a new order should be placed
+            to avoid stockouts during supplier lead time.
+
+        </p>
+
+    </div>
+
+
+
+    <!-- =========================================
+         MACHINE LEARNING PERFORMANCE
+         ========================================= -->
+
+    <div class="model-section">
+
+        <h2>
+            🤖 Machine Learning Model Performance
+        </h2>
+
+        <p class="section-description">
+
+            Evaluation metrics calculated using
+            the test portion of the Rossmann
+            sales dataset.
+
+        </p>
+
+
+        <div class="metric-grid">
+
+
+            <!-- MAE -->
+
+            <div class="metric-card">
+
+                <h3>
+                    MAE
+                </h3>
+
+                <div class="metric-value">
+                    {{ mae }}
+                </div>
+
+                <p>
+                    Mean Absolute Error
+                </p>
+
+            </div>
+
+
+            <!-- RMSE -->
+
+            <div class="metric-card">
+
+                <h3>
+                    RMSE
+                </h3>
+
+                <div class="metric-value">
+                    {{ rmse }}
+                </div>
+
+                <p>
+                    Root Mean Squared Error
+                </p>
+
+            </div>
+
+
+            <!-- R2 -->
+
+            <div class="metric-card">
+
+                <h3>
+                    R² Score
+                </h3>
+
+                <div class="metric-value">
+                    {{ r2 }}
+                </div>
+
+                <p>
+                    Coefficient of Determination
+                </p>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =========================================
+         BACK BUTTON
+         ========================================= -->
+
+    <div class="button-section">
+
+        <a href="{{ url_for('home') }}"
+           class="back-button">
+
+            ← Make Another Prediction
+
+        </a>
+
+    </div>
+
+
+
+    <!-- =========================================
+         FOOTER
+         ========================================= -->
+
+    <footer>
+
+        <p>
+            Retail Automated Inventory Reorder Point Optimizer
+        </p>
+
+        <p>
+            Powered by Machine Learning & Flask
+        </p>
+
+    </footer>
+
+</div>
+
+
+<script src="{{ url_for('static', filename='js/result.js') }}"></script>
+<!-- =========================================
+     INVENTORY BAR JAVASCRIPT
+     ========================================= -->
+
+
+
+
+</body>
+
+</html>

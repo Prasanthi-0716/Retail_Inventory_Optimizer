@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Retail Inventory Optimizer</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+
+<body>
+
+<div class="container">
+
+
+    <!-- =========================================
+         HEADER
+         ========================================= -->
+
+    <header class="page-header">
+
+        <h1>📦 Retail Inventory Optimizer</h1>
+
+        <p>
+            Machine Learning Based Sales Prediction
+            & Reorder Point Analysis
+        </p>
+
+    </header>
+
+
+    <!-- ERROR MESSAGE -->
+
+    {% if error %}
+
+    <div class="error-message">
+        ⚠️ {{ error }}
+    </div>
+
+    {% endif %}
+
+
+
+    <!-- =========================================
+         PREDICTION FORM
+         ========================================= -->
+
+    <form action="{{ url_for('predict') }}"
+          method="POST"
+          id="predictionForm">
+
+
+        <!-- =====================================
+             STORE INFORMATION
+             ===================================== -->
+
+        <div class="form-section">
+
+            <h2>🏪 Store Information</h2>
+
+            <div class="form-grid">
+
+
+                <!-- Store ID -->
+
+                <div class="form-group">
+
+                    <label for="store">
+                        Store ID
+                    </label>
+
+                    <input
+                        type="number"
+                        id="store"
+                        name="store"
+                        min="1"
+                        placeholder="Example: 1"
+                        required>
+
+                </div>
+
+
+                <!-- Store Type -->
+
+                <div class="form-group">
+
+                    <label for="store_type">
+                        Store Type
+                    </label>
+
+                    <select
+                        id="store_type"
+                        name="store_type"
+                        required>
+
+                        <option value="">
+                            Select Store Type
+                        </option>
+
+                        <option value="a">
+                            Type A
+                        </option>
+
+                        <option value="b">
+                            Type B
+                        </option>
+
+                        <option value="c">
+                            Type C
+                        </option>
+
+                        <option value="d">
+                            Type D
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- Assortment -->
+
+                <div class="form-group">
+
+                    <label for="assortment">
+                        Assortment
+                    </label>
+
+                    <select
+                        id="assortment"
+                        name="assortment"
+                        required>
+
+                        <option value="">
+                            Select Assortment
+                        </option>
+
+                        <option value="a">
+                            Basic
+                        </option>
+
+                        <option value="b">
+                            Extra
+                        </option>
+
+                        <option value="c">
+                            Extended
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- Competition Distance -->
+
+                <div class="form-group">
+
+                    <label for="competition_distance">
+                        Competition Distance (meters)
+                    </label>
+
+                    <input
+                        type="number"
+                        id="competition_distance"
+                        name="competition_distance"
+                        min="0"
+                        step="0.01"
+                        placeholder="Example: 1270"
+                        required>
+
+                    <small>
+                        Distance to the nearest competitor.
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =====================================
+             DATE INFORMATION
+             ===================================== -->
+
+        <div class="form-section">
+
+            <h2>📅 Date Information</h2>
+
+            <div class="form-grid">
+
+
+                <!-- Date Picker -->
+
+                <div class="form-group">
+
+                    <label for="prediction_date">
+                        Prediction Date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="prediction_date"
+                        name="prediction_date"
+                        required>
+
+                    <small>
+                        Select the date for sales prediction.
+                    </small>
+
+                </div>
+
+
+                <!-- Day of Week -->
+
+                <div class="form-group">
+
+                    <label for="day_of_week">
+                        Day of Week
+                    </label>
+
+                    <input
+                        type="number"
+                        id="day_of_week"
+                        name="day_of_week"
+                        min="1"
+                        max="7"
+                        readonly
+                        required>
+
+                    <small>
+                        Automatically calculated
+                        (1 = Monday, 7 = Sunday).
+                    </small>
+
+                </div>
+
+
+                <!-- Day -->
+
+                <div class="form-group">
+
+                    <label for="day">
+                        Day
+                    </label>
+
+                    <input
+                        type="number"
+                        id="day"
+                        name="day"
+                        readonly
+                        required>
+
+                </div>
+
+
+                <!-- Month -->
+
+                <div class="form-group">
+
+                    <label for="month">
+                        Month
+                    </label>
+
+                    <input
+                        type="number"
+                        id="month"
+                        name="month"
+                        readonly
+                        required>
+
+                </div>
+
+
+                <!-- Year -->
+
+                <div class="form-group">
+
+                    <label for="year">
+                        Year
+                    </label>
+
+                    <input
+                        type="number"
+                        id="year"
+                        name="year"
+                        readonly
+                        required>
+
+                </div>
+
+
+                <!-- Week of Year -->
+
+                <div class="form-group">
+
+                    <label for="week_of_year">
+                        Week of Year
+                    </label>
+
+                    <input
+                        type="number"
+                        id="week_of_year"
+                        name="week_of_year"
+                        readonly
+                        required>
+
+                    <small>
+                        Automatically calculated.
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =====================================
+             PROMOTION & HOLIDAY
+             ===================================== -->
+
+        <div class="form-section">
+
+            <h2>
+                🎯 Promotion & Holiday Information
+            </h2>
+
+            <div class="form-grid">
+
+
+                <!-- Promo -->
+
+                <div class="form-group">
+
+                    <label for="promo">
+                        Promotion
+                    </label>
+
+                    <select
+                        id="promo"
+                        name="promo"
+                        required>
+
+                        <option value="0">
+                            No Promotion
+                        </option>
+
+                        <option value="1">
+                            Promotion Active
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- Promo2 -->
+
+                <div class="form-group">
+
+                    <label for="promo2">
+                        Promo2
+                    </label>
+
+                    <select
+                        id="promo2"
+                        name="promo2"
+                        required>
+
+                        <option value="0">
+                            No Promo2
+                        </option>
+
+                        <option value="1">
+                            Promo2 Active
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- School Holiday -->
+
+                <div class="form-group">
+
+                    <label for="school_holiday">
+                        School Holiday
+                    </label>
+
+                    <select
+                        id="school_holiday"
+                        name="school_holiday"
+                        required>
+
+                        <option value="0">
+                            No
+                        </option>
+
+                        <option value="1">
+                            Yes
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- State Holiday -->
+
+                <div class="form-group">
+
+                    <label for="state_holiday">
+                        State Holiday
+                    </label>
+
+                    <select
+                        id="state_holiday"
+                        name="state_holiday"
+                        required>
+
+                        <option value="0">
+                            No Holiday
+                        </option>
+
+                        <option value="a">
+                            Public Holiday
+                        </option>
+
+                        <option value="b">
+                            Easter Holiday
+                        </option>
+
+                        <option value="c">
+                            Christmas Holiday
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- Promo Interval -->
+
+                <div class="form-group">
+
+                    <label for="promo_interval">
+                        Promo Interval
+                    </label>
+
+                    <select
+                        id="promo_interval"
+                        name="promo_interval"
+                        required>
+
+                        <option value="None">
+                            None
+                        </option>
+
+                        <option value="Jan,Apr,Jul,Oct">
+                            Jan, Apr, Jul, Oct
+                        </option>
+
+                        <option value="Feb,May,Aug,Nov">
+                            Feb, May, Aug, Nov
+                        </option>
+
+                        <option value="Mar,Jun,Sept,Dec">
+                            Mar, Jun, Sept, Dec
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =====================================
+             COMPETITION INFORMATION
+             ===================================== -->
+
+        <div class="form-section">
+
+            <h2>🏢 Competition Information</h2>
+
+            <div class="form-grid">
+
+
+                <!-- Competition Open Month -->
+
+                <div class="form-group">
+
+                    <label for="competition_open_month">
+                        Competition Open Month
+                    </label>
+
+                    <input
+                        type="number"
+                        id="competition_open_month"
+                        name="competition_open_month"
+                        min="0"
+                        max="12"
+                        value="0"
+                        required>
+
+                    <small>
+                        Enter 0 if there is no competition.
+                    </small>
+
+                </div>
+
+
+                <!-- Competition Open Year -->
+
+                <div class="form-group">
+
+                    <label for="competition_open_year">
+                        Competition Open Year
+                    </label>
+
+                    <input
+                        type="number"
+                        id="competition_open_year"
+                        name="competition_open_year"
+                        min="0"
+                        value="0"
+                        required>
+
+                    <small>
+                        Enter 0 if there is no competition.
+                    </small>
+
+                </div>
+
+
+                <!-- Promo2 Since Week -->
+
+                <div class="form-group">
+
+                    <label for="promo2_since_week">
+                        Promo2 Since Week
+                    </label>
+
+                    <input
+                        type="number"
+                        id="promo2_since_week"
+                        name="promo2_since_week"
+                        min="0"
+                        max="52"
+                        value="0"
+                        required>
+
+                </div>
+
+
+                <!-- Promo2 Since Year -->
+
+                <div class="form-group">
+
+                    <label for="promo2_since_year">
+                        Promo2 Since Year
+                    </label>
+
+                    <input
+                        type="number"
+                        id="promo2_since_year"
+                        name="promo2_since_year"
+                        min="0"
+                        value="0"
+                        required>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =====================================
+             INVENTORY INFORMATION
+             ===================================== -->
+
+        <div class="form-section inventory-section">
+
+            <h2>📦 Inventory Information</h2>
+
+            <p class="section-description">
+
+                Enter the current inventory and
+                supply information to calculate
+                the reorder point.
+
+            </p>
+
+
+            <div class="form-grid">
+
+
+                <!-- Current Inventory -->
+
+                <div class="form-group">
+
+                    <label for="current_inventory">
+                        Current Inventory
+                    </label>
+
+                    <input
+                        type="number"
+                        id="current_inventory"
+                        name="current_inventory"
+                        min="0"
+                        step="0.01"
+                        placeholder="Example: 1200"
+                        required>
+
+                </div>
+
+
+                <!-- Lead Time -->
+
+                <div class="form-group">
+
+                    <label for="lead_time">
+                        Lead Time (days)
+                    </label>
+
+                    <input
+                        type="number"
+                        id="lead_time"
+                        name="lead_time"
+                        min="0"
+                        step="0.1"
+                        placeholder="Example: 3"
+                        required>
+
+                    <small>
+                        Number of days required
+                        for replenishment.
+                    </small>
+
+                </div>
+
+
+                <!-- Safety Stock -->
+
+                <div class="form-group">
+
+                    <label for="safety_stock">
+                        Safety Stock
+                    </label>
+
+                    <input
+                        type="number"
+                        id="safety_stock"
+                        name="safety_stock"
+                        min="0"
+                        step="0.01"
+                        placeholder="Example: 200"
+                        required>
+
+                    <small>
+                        Extra inventory maintained
+                        to handle demand uncertainty.
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =====================================
+             SUBMIT
+             ===================================== -->
+
+        <div class="submit-section">
+
+            <button
+                type="submit"
+                class="predict-button">
+
+                🔮 Predict Sales & Calculate
+                Reorder Point
+
+            </button>
+
+        </div>
+
+
+    </form>
+
+
+
+    <!-- =========================================
+         HOW IT WORKS
+         ========================================= -->
+
+    <div class="info-section">
+
+        <h2>
+            ⚙️ How the System Works
+        </h2>
+
+
+        <div class="info-grid">
+
+
+            <div class="info-card">
+
+                <div class="info-icon">
+                    📊
+                </div>
+
+                <h3>
+                    1. Input Data
+                </h3>
+
+                <p>
+                    Enter store, date, promotion
+                    and inventory information.
+                </p>
+
+            </div>
+
+
+            <div class="info-card">
+
+                <div class="info-icon">
+                    🤖
+                </div>
+
+                <h3>
+                    2. Sales Prediction
+                </h3>
+
+                <p>
+                    The machine learning model
+                    predicts expected daily sales.
+                </p>
+
+            </div>
+
+
+            <div class="info-card">
+
+                <div class="info-icon">
+                    🧮
+                </div>
+
+                <h3>
+                    3. Reorder Point
+                </h3>
+
+                <p>
+                    The system calculates the
+                    required reorder point.
+                </p>
+
+            </div>
+
+
+            <div class="info-card">
+
+                <div class="info-icon">
+                    📦
+                </div>
+
+                <h3>
+                    4. Inventory Decision
+                </h3>
+
+                <p>
+                    Current stock is compared with
+                    the reorder point.
+                </p>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =========================================
+         FOOTER
+         ========================================= -->
+
+    <footer>
+
+        <p>
+            Retail Automated Inventory Reorder Point Optimizer
+        </p>
+
+        <p>
+            Powered by Machine Learning & Flask
+        </p>
+
+    </footer>
+
+
+</div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const dateInput = document.getElementById("prediction_date");
+
+    const dayOfWeekInput = document.getElementById("day_of_week");
+    const dayInput = document.getElementById("day");
+    const monthInput = document.getElementById("month");
+    const yearInput = document.getElementById("year");
+    const weekInput = document.getElementById("week_of_year");
+
+
+    console.log("Inventory Optimizer JavaScript loaded.");
+
+    console.log("Date input:", dateInput);
+    console.log("Day of week:", dayOfWeekInput);
+    console.log("Day:", dayInput);
+    console.log("Month:", monthInput);
+    console.log("Year:", yearInput);
+    console.log("Week:", weekInput);
+
+
+    // Check elements
+    if (
+        !dateInput ||
+        !dayOfWeekInput ||
+        !dayInput ||
+        !monthInput ||
+        !yearInput ||
+        !weekInput
+    ) {
+
+        alert(
+            "Error: Date fields were not found. Please check index.html."
+        );
+
+        return;
+    }
+
+
+    // Calculate week number
+    function getWeekNumber(date) {
+
+        const tempDate = new Date(date.getTime());
+
+        tempDate.setHours(0, 0, 0, 0);
+
+        tempDate.setDate(
+            tempDate.getDate()
+            + 3
+            - (
+                (tempDate.getDay() + 6) % 7
+            )
+        );
+
+
+        const week1 = new Date(
+            tempDate.getFullYear(),
+            0,
+            4
+        );
+
+
+        return (
+            1 +
+            Math.round(
+                (
+                    (
+                        tempDate - week1
+                    ) / 86400000
+                    - 3
+                    + (
+                        (week1.getDay() + 6) % 7
+                    )
+                ) / 7
+            )
+        );
+    }
+
+
+    // Update fields
+    function updateDateFields() {
+
+        console.log(
+            "Selected date:",
+            dateInput.value
+        );
+
+
+        if (!dateInput.value) {
+
+            dayOfWeekInput.value = "";
+            dayInput.value = "";
+            monthInput.value = "";
+            yearInput.value = "";
+            weekInput.value = "";
+
+            return;
+        }
+
+
+        /*
+         * HTML date input gives:
+         *
+         * YYYY-MM-DD
+         *
+         * Example:
+         * 2020-03-16
+         */
+
+        const parts =
+            dateInput.value.split("-");
+
+
+        if (parts.length !== 3) {
+
+            console.error(
+                "Invalid date format:",
+                dateInput.value
+            );
+
+            return;
+        }
+
+
+        const year =
+            parseInt(parts[0], 10);
+
+        const month =
+            parseInt(parts[1], 10);
+
+        const day =
+            parseInt(parts[2], 10);
+
+
+        const selectedDate =
+            new Date(
+                year,
+                month - 1,
+                day
+            );
+
+
+        /*
+         * JavaScript:
+         *
+         * Sunday = 0
+         * Monday = 1
+         * Tuesday = 2
+         * ...
+         * Saturday = 6
+         *
+         * Rossmann:
+         *
+         * Monday = 1
+         * ...
+         * Sunday = 7
+         */
+
+
+        let dayOfWeek =
+            selectedDate.getDay();
+
+
+        if (dayOfWeek === 0) {
+
+            dayOfWeek = 7;
+
+        }
+
+
+        // Fill fields
+
+        dayOfWeekInput.value =
+            dayOfWeek;
+
+        dayInput.value =
+            day;
+
+        monthInput.value =
+            month;
+
+        yearInput.value =
+            year;
+
+        weekInput.value =
+            getWeekNumber(selectedDate);
+
+
+        console.log(
+            "Day of Week:",
+            dayOfWeek
+        );
+
+        console.log(
+            "Day:",
+            day
+        );
+
+        console.log(
+            "Month:",
+            month
+        );
+
+        console.log(
+            "Year:",
+            year
+        );
+
+        console.log(
+            "Week:",
+            weekInput.value
+        );
+    }
+
+
+    // When date is changed
+    dateInput.addEventListener(
+        "change",
+        updateDateFields
+    );
+
+
+    // Also when date is entered
+    dateInput.addEventListener(
+        "input",
+        updateDateFields
+    );
+
+
+});
+</script>
+
+
+
+</body>
+
+</html>
